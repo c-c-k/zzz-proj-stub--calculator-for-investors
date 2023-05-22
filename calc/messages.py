@@ -2,6 +2,7 @@ ERROR_NOT_IMPLEMENTED = "Not implemented!"
 ERROR_INVALID_OPTION = "Invalid option!"
 INFO_GOODBYE = "Have a nice day!"
 INFO_ENTER_OPTION = "Enter an option:"
+INFO_DB_CREATED = "Database created successfully!"
 MENU_MAIN = """
 MAIN MENU
 0 Exit

@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from . import view, model
 
@@ -83,14 +84,23 @@ def controller(command):
             view.print_invalid_menu_option_error()
             next_command = ["menu", "top_ten"]
 
+        # === one-off commands ===
+
+        # database initialization
+        case ["init_db", force]:
+            view.init_db(force)
+
         # exit program
         case ["exit"]:
             view.print_exit_message()
-            exit()
+            sys.exit()
 
         # catch all for unhandled commands
         case [*unhandled_command]:
             view.print_unhandled_command_message(unhandled_command)
             next_command = ["menu", "main"]
 
-    return next_command
+    try:
+        return next_command
+    except UnboundLocalError:
+        return None

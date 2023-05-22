@@ -35,6 +35,12 @@ def get_menu_option_top_ten():
     return get_user_input(msg.MENU_TOP_TEN + msg.INFO_ENTER_OPTION)
 
 
+# database initialization
+def init_db(force=False):
+    if model.init_db(force):
+        print_message(msg.INFO_DB_CREATED)
+
+
 # exit
 def print_exit_message():
     print_message(msg.INFO_GOODBYE)
