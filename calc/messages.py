@@ -8,17 +8,20 @@ INFO_GOODBYE = "Have a nice day!"
 INFO_ENTER_OPTION = "Enter an option:"
 INFO_DB_CREATED = "Database created successfully!"
 INFO_COMPANY_READ_HEADER = Template("${ticker} ${name}")
-INFO_COMPANY_READ_STATISTIC = Template("${stat_name} = ${stat_value}")
+INFO_COMPANY_READ_STATISTIC = Template("${stat_id} = ${stat_value}")
 INFO_COMPANY_CREATED = "Company created successfully!"
 INFO_COMPANY_UPDATED = "Company updated successfully!"
 INFO_COMPANY_DELETED = "Company deleted successfully!"
 INFO_COMPANY_LIST = "COMPANY LIST"
 INFO_COMPANY_LIST_ENTRY = Template("${ticker} ${name} ${sector}")
+INFO_COMPANY_TOP_TEN_HEADER = Template("TICKER ${stat_id}")
+INFO_COMPANY_TOP_TEN_ENTRY = Template("${ticker} ${stat_value}")
 MENU_MAIN = """
 MAIN MENU
 0 Exit
 1 CRUD operations
-2 Show top ten companies by criteria"""
+2 Show top ten companies by criteria
+"""
 MENU_CRUD = """
 CRUD MENU
 0 Back

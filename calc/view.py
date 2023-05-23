@@ -67,12 +67,12 @@ def company_read(company_data):
     print_message(msg.INFO_COMPANY_READ_HEADER.substitute(
         ticker=company_data['ticker'], name=company_data['name']
     ))
-    for stat_name, stat_function in STATISTICS.items():
+    for stat_id, stat_function in STATISTICS.items():
         stat_value = stat_function(company_data)
         stat_value = (f"{round(stat_value, 2)}"
                       if stat_value is not None else None)
         print_message(msg.INFO_COMPANY_READ_STATISTIC.substitute(
-            stat_name=stat_name, stat_value=stat_value))
+            stat_id=stat_id, stat_value=stat_value))
 
 
 def company_update(company_data):
@@ -104,6 +104,23 @@ def company_list_all():
 # top_ten menu
 def get_menu_option_top_ten():
     return get_user_input(msg.MENU_TOP_TEN + msg.INFO_ENTER_OPTION)
+
+
+def print_top_ten(stat_id):
+    all_data = model.get_all_data()
+    stat_function = STATISTICS[stat_id]
+    statistic_data = []
+    for company_data in all_data:
+        try:
+            value = str(round(stat_function(company_data), 2))
+        except TypeError:
+            continue
+        statistic_data.append((company_data["ticker"], value))
+    statistic_data.sort(key=lambda stat_info: stat_info[1], reverse=True)
+    print_message(msg.INFO_COMPANY_TOP_TEN_HEADER.substitute(stat_id=stat_id))
+    for ticker, stat_value in statistic_data[:10]:
+        print_message(msg.INFO_COMPANY_TOP_TEN_ENTRY.substitute(
+            ticker=ticker, stat_value=stat_value))
 
 
 # database initialization

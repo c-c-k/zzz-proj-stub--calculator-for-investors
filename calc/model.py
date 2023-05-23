@@ -101,14 +101,14 @@ def company_create(company_data):
     session.close()
 
 
-def convert_companies_to_dict(companies):
-    if len(companies) == 0:
+def convert_model_objects_to_model_data(obj_list, model_fields):
+    if len(obj_list) == 0:
         return None
-    companies_data = [
-        {field: getattr(company, field) for field in COMPANIES_FIELDS}
-        for company in companies
-    ]
-    return companies_data
+    model_data = {
+        getattr(obj, "ticker"): {field: getattr(obj, field) for field in model_fields}
+        for obj in obj_list
+    }
+    return model_data
 
 
 def companies_by_name(name):
@@ -117,14 +117,29 @@ def companies_by_name(name):
         .filter(Companies.name.contains(name)).all()
     # .filter(text("name LIKE '%:name%'")).params(name=name).all()
     session.close()
-    return convert_companies_to_dict(companies)
+    companies_data = convert_model_objects_to_model_data(companies, COMPANIES_FIELDS)
+    if companies_data is None:
+        return None
+    return companies_data.values()
 
 
 def companies_get_all():
     session = Session()
     companies = session.query(Companies).order_by(Companies.ticker).all()
     session.close()
-    return convert_companies_to_dict(companies)
+    return convert_model_objects_to_model_data(companies, COMPANIES_FIELDS).values()
+
+
+def get_all_data():
+    session = Session()
+    companies = session.query(Companies).order_by(Companies.ticker).all()
+    financial = session.query(Financial).order_by(Financial.ticker).all()
+    session.close()
+    companies_data = convert_model_objects_to_model_data(companies, COMPANIES_FIELDS)
+    financial_data = convert_model_objects_to_model_data(financial, FINANCIAL_FIELDS)
+    for ticker, company_data in companies_data.items():
+        company_data.update(financial_data[ticker])
+    return companies_data.values()
 
 
 def company_read(company_data):

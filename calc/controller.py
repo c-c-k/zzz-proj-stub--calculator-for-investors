@@ -83,20 +83,20 @@ def controller(command):
             next_command = ["menu", "main"]
         case ["menu_option", "top_ten", "1"]:
             # 1 List by ND/EBITDA
-            view.print_not_implented()
+            view.print_top_ten("ND/EBITDA")
             next_command = ["menu", "main"]
         case ["menu_option", "top_ten", "2"]:
             # 2 List by ROE
-            view.print_not_implented()
+            view.print_top_ten("ROE")
             next_command = ["menu", "main"]
         case ["menu_option", "top_ten", "3"]:
             # 3 List by ROA
-            view.print_not_implented()
+            view.print_top_ten("ROA")
             next_command = ["menu", "main"]
         case ["menu_option", "top_ten", _]:
             # invalid option
             view.print_invalid_menu_option_error()
-            next_command = ["menu", "top_ten"]
+            next_command = ["menu", "main"]
 
         # === one_off commands ===
 
