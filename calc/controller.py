@@ -15,7 +15,7 @@ def controller(command):
             next_command = ["menu_option", "main", option]
         case ["menu_option", "main", "0"]:
             # 0. Exit
-            next_command = ["exit"]
+            next_command = ["one_off", "exit"]
         case ["menu_option", "main", "1"]:
             # 1 CRUD operations
             next_command = ["menu", "crud"]
@@ -36,29 +36,43 @@ def controller(command):
             next_command = ["menu", "main"]
         case ["menu_option", "crud", "1"]:
             # 1 Create a company
-            view.print_not_implented()
+            view.company_create()
             next_command = ["menu", "main"]
         case ["menu_option", "crud", "2"]:
-            # 2 Read a company
-            view.print_not_implented()
-            next_command = ["menu", "main"]
+            # 2 Read a company - select company
+            company = view.select_company()
+            next_command = ["crud", "read", company]
         case ["menu_option", "crud", "3"]:
-            # 3 Update a company
-            view.print_not_implented()
-            next_command = ["menu", "main"]
+            # 3 Update a company - select company
+            company = view.select_company()
+            next_command = ["crud", "update", company]
         case ["menu_option", "crud", "4"]:
-            # 4 Delete a company
-            view.print_not_implented()
-            next_command = ["menu", "main"]
+            # 4 Delete a company - select company
+            company = view.select_company()
+            next_command = ["crud", "delete", company]
         case ["menu_option", "crud", "5"]:
             # 5 List all companies
-            view.print_not_implented()
+            view.company_list_all()
             next_command = ["menu", "main"]
         case ["menu_option", "crud", _]:
             # invalid option
             view.print_invalid_menu_option_error()
             next_command = ["menu", "crud"]
 
+        # crud company dependent executors
+        case ["crud", _, None]:
+            # handle no company has been found situation
+            view.print_company_not_found_error()
+            next_command = ["menu", "main"]
+        case ["crud", "read", company]:
+            view.company_read(company)
+            next_command = ["menu", "main"]
+        case ["crud", "update", company]:
+            view.company_update(company)
+            next_command = ["menu", "main"]
+        case ["crud", "delete", company]:
+            view.company_delete(company)
+            next_command = ["menu", "main"]
 
         # top_ten menu
         case ["menu", "top_ten"]:
@@ -84,14 +98,18 @@ def controller(command):
             view.print_invalid_menu_option_error()
             next_command = ["menu", "top_ten"]
 
-        # === one-off commands ===
+        # === one_off commands ===
+
+        # welcome at program start
+        case ["one_off", "welcome"]:
+            view.print_welcome_message()
 
         # database initialization
-        case ["init_db", force]:
+        case ["one_off", "init_db", force]:
             view.init_db(force)
 
         # exit program
-        case ["exit"]:
+        case ["one_off", "exit"]:
             view.print_exit_message()
             sys.exit()
 

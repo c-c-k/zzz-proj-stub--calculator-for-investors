@@ -1,6 +1,8 @@
+from itertools import count
 import logging
 
 from . import messages as msg
+from .misc import FIELD_VIEW_META, UPDATE_FIELDS, STATISTICS
 from . import model
 
 logger = logging.getLogger(__name__)
@@ -30,6 +32,75 @@ def get_menu_option_crud():
     return get_user_input(msg.MENU_CRUD + msg.INFO_ENTER_OPTION)
 
 
+def company_create():
+    company_data = {}
+    for field, view_meta in FIELD_VIEW_META.items():
+        company_data[field] = get_user_input(
+            msg.PROMPT_ENTER_DATA.substitute(
+                label=view_meta["label"], example=view_meta["example"]
+            )
+        )
+    model.company_create(company_data)
+    print_message(msg.INFO_COMPANY_CREATED)
+
+
+def select_company():
+    name = get_user_input(msg.PROMPT_ENTER_COMPANY_NAME)
+    companies = model.companies_by_name(name)
+    if companies is None:
+        return None
+    companies_with_index = dict(zip(
+        (str(index) for index in count()),
+        companies
+    ))
+    for index, company in companies_with_index.items():
+        print(index, company['name'])
+    # index = get_user_input(msg.PROMPT_ENTER_COMPANY_NUMBER)
+    index = input(msg.PROMPT_ENTER_COMPANY_NUMBER)
+    while index not in companies_with_index.keys():
+        index = get_user_input(msg.ERROR_INVALID_OPTION)
+    return companies_with_index[index]
+
+
+def company_read(company_data):
+    company_data = model.company_read(company_data)
+    print_message(msg.INFO_COMPANY_READ_HEADER.substitute(
+        ticker=company_data['ticker'], name=company_data['name']
+    ))
+    for stat_name, stat_function in STATISTICS.items():
+        stat_value = stat_function(company_data)
+        stat_value = (f"{round(stat_value, 2)}"
+                      if stat_value is not None else None)
+        print_message(msg.INFO_COMPANY_READ_STATISTIC.substitute(
+            stat_name=stat_name, stat_value=stat_value))
+
+
+def company_update(company_data):
+    for field in UPDATE_FIELDS:
+        view_meta = FIELD_VIEW_META[field]
+        company_data[field] = get_user_input(
+            msg.PROMPT_ENTER_DATA.substitute(
+                label=view_meta["label"], example=view_meta["example"]
+            )
+        )
+    model.company_update(company_data)
+    print_message(msg.INFO_COMPANY_UPDATED)
+
+
+def company_delete(company_data):
+    model.company_delete(company_data)
+    print_message(msg.INFO_COMPANY_DELETED)
+
+
+def company_list_all():
+    print_message(msg.INFO_COMPANY_LIST)
+    for company_data in model.companies_get_all():
+        print_message(msg.INFO_COMPANY_LIST_ENTRY.substitute(
+            ticker=company_data['ticker'], name=company_data['name'],
+            sector=company_data['sector']
+        ))
+
+
 # top_ten menu
 def get_menu_option_top_ten():
     return get_user_input(msg.MENU_TOP_TEN + msg.INFO_ENTER_OPTION)
@@ -38,12 +109,23 @@ def get_menu_option_top_ten():
 # database initialization
 def init_db(force=False):
     if model.init_db(force):
-        print_message(msg.INFO_DB_CREATED)
+        # print_message(msg.INFO_DB_CREATED)
+        pass
+
+
+# welcome at program start
+def print_welcome_message():
+    print_message(msg.INFO_WELCOME)
 
 
 # exit
 def print_exit_message():
     print_message(msg.INFO_GOODBYE)
+
+
+# print company not found message
+def print_company_not_found_error():
+    print_message(msg.ERROR_COMPANY_NOT_FOUND)
 
 
 # print not implemented message

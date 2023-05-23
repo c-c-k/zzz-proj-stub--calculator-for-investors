@@ -1,8 +1,13 @@
 import csv
+import logging
 from pathlib import Path
 
-from sqlalchemy import create_engine, String, Float
+from sqlalchemy import create_engine, String, Float, text
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, mapped_column
+
+from .misc import COMPANIES_FIELDS, FINANCIAL_FIELDS
+
+logger = logging.getLogger(__name__)
 
 DB_PATH = Path("investor.db")
 DB_URI = f"sqlite:///{DB_PATH.as_posix()}?check_same_thread=False"
@@ -58,7 +63,6 @@ def load_data(session, data, model_cls):
     session.commit()
 
 
-
 def init_db(force=False):
     if DB_PATH.exists():
         if force:
@@ -75,3 +79,84 @@ def init_db(force=False):
     return True
 
 
+def split_company_data(company_data):
+    companies_data = {
+        field: company_data[field]
+        for field in COMPANIES_FIELDS
+    }
+    financial_data = {
+        field: company_data[field]
+        for field in FINANCIAL_FIELDS
+    }
+    return companies_data, financial_data
+
+
+def company_create(company_data):
+    companies_data, financial_data = split_company_data(company_data)
+    session = Session()
+    companies_obj = Companies(**companies_data)
+    financial_obj = Financial(**financial_data)
+    session.add_all([companies_obj, financial_obj])
+    session.commit()
+    session.close()
+
+
+def convert_companies_to_dict(companies):
+    if len(companies) == 0:
+        return None
+    companies_data = [
+        {field: getattr(company, field) for field in COMPANIES_FIELDS}
+        for company in companies
+    ]
+    return companies_data
+
+
+def companies_by_name(name):
+    session = Session()
+    companies = session.query(Companies) \
+        .filter(Companies.name.contains(name)).all()
+    # .filter(text("name LIKE '%:name%'")).params(name=name).all()
+    session.close()
+    return convert_companies_to_dict(companies)
+
+
+def companies_get_all():
+    session = Session()
+    companies = session.query(Companies).order_by(Companies.ticker).all()
+    session.close()
+    return convert_companies_to_dict(companies)
+
+
+def company_read(company_data):
+    session = Session()
+    financial = session.query(Financial) \
+        .filter(Financial.ticker == company_data['ticker']).one()
+    session.close()
+    company_data.update(
+        {field: getattr(financial, field) for field in FINANCIAL_FIELDS}
+    )
+    return company_data
+
+
+def company_update(company_data):
+    companies_data, financial_data = split_company_data(company_data)
+    session = Session()
+    for model, data in (
+            (Companies, companies_data), (Financial, financial_data)):
+        model_obj = session.query(model) \
+            .filter(model.ticker == data['ticker']).one()
+        for field, new_value in data.items():
+            setattr(model_obj, field, new_value)
+    session.commit()
+    session.close()
+
+
+def company_delete(company_data):
+    session = Session()
+    company = session.query(Companies) \
+        .filter(Companies.ticker == company_data['ticker']).one()
+    financial = session.query(Financial) \
+        .filter(Financial.ticker == company_data['ticker']).one()
+    session.delete(company)
+    session.delete(financial)
+    session.commit()

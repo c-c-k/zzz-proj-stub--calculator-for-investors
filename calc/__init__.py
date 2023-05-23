@@ -18,7 +18,8 @@ logger.addHandler(logging.NullHandler())
 
 
 def main():
-    controller(["init_db", "--reset_db" in argv])
-    command = None  # ["menu", "main"]
+    controller(["one_off", "welcome"])
+    controller(["one_off", "init_db", "--reset_db" in argv])
+    command = ["menu", "main"]
     while command is not None:
         command = controller(command)
